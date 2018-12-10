@@ -24,8 +24,14 @@ However, if the initial import of vtkmodule1 is removed then this error goes awa
 
 To Run (using docker):
 
-	$ docker build -t test . && docker run test 
+	$ docker build -t test . && docker run -it test 
 	
 Or 
 
-	$ docker run batearedcollie/vtkwrappingissue
+	$ docker run -it batearedcollie/vtkwrappingissue
+	
+**UPDATE** 
+
+Issue has been fixed. See latest commit.  
+Solution was to chnage the pythonD libraries from a static to a shared library  which are linked to by the python modules. 
+Note this solution is probably system dependent and might be specific to Ubuntu. 

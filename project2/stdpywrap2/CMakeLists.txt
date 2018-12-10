@@ -37,51 +37,48 @@ foreach(MOD ${PYTHON_MODULES})
     vtk_wrap_python3(${MOD} PY_SRC_FILES "${SRC_FILES}")
     
     # PythonD target
-    add_library(${MOD}PythonD ${PY_SRC_FILES} ${SRC_FILES})
+    add_library(${MOD}PythonD SHARED ${PY_SRC_FILES} ${SRC_FILES})
+    #add_library(${MOD}PythonD ${PY_SRC_FILES} ${SRC_FILES})
     target_link_libraries(${MOD}PythonD    
-                            ${PREVMODS} 
-                            ${project1_LIBRARIES}   
-                            ${VTK_LIBRARIES}
                             vtkWrappingPythonCore 
-                            ${VTK_PYTHON_LIBRARIES}
                             )
-
-    message(STATUS "VTK_PYTHOND_LIBS=${VTK_PYTHOND_LIBS}")
-    message(STATUS "project1_PYTHOND_STATIC_LIBRARIES=${project1_PYTHOND_STATIC_LIBRARIES}")
-    message(STATUS "project1_PYTHON_SHARED_LIBRARIES=${project1_PYTHON_SHARED_LIBRARIES}")
 
     # Shared library target
     add_library(${MOD} MODULE ${MOD}Init.cxx)
+    
+    #
+    # FIX - we have to link against the shared pythonD libraries not the static libraries
+    #       we will also install these in /sur/local not in the python module.
+    #
+#    target_link_libraries(${MOD} 
+#                        ${MOD}PythonD  
+#                        ${project1_PYTHOND_STATIC_LIBRARIES}
+#                        ${VTK_PYTHOND_LIBS}
+#                        )
     target_link_libraries(${MOD} 
                         ${MOD}PythonD  
-                        ${project1_PYTHOND_STATIC_LIBRARIES}
+                        ${project1_PYTHOND_SHARED_LIBRARIES}
                         ${VTK_PYTHOND_LIBS}
                         )
           
     set_target_properties(${MOD} PROPERTIES PREFIX "")
 
-
-#    ADD_CUSTOM_TARGET(link_${MOD} ALL
-#                  COMMAND ${CMAKE_COMMAND} -E create_symlink ${PYTHON_INSTALL_DIR}/${MOD} ${PYTHON_INSTALL_DIR}/lib${MOD})
-
     # Add a dependecy to the main target
     add_dependencies(pythonWrapping ${MOD})
 
     # Install targets
-    install(TARGETS ${MOD} ${MOD}PythonD 
+    install(TARGETS ${MOD} 
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION ${PYTHON_INSTALL_DIR}
         ARCHIVE DESTINATION ${PYTHON_INSTALL_DIR}
         )
 
-    set(INSTALL_CODE "execute_process(")
-    set(INSTALL_CODE "${INSTALL_CODE} COMMAND ln -s")
-    set(INSTALL_CODE "${INSTALL_CODE} ${CMAKE_INSTALL_PREFIX}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages/stdpywrap2/${MOD}.so ")
-    set(INSTALL_CODE "${INSTALL_CODE} ${CMAKE_INSTALL_PREFIX}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages/stdpywrap2/lib${MOD}.so ")    
-    set(INSTALL_CODE "${INSTALL_CODE} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}")
-    set(INSTALL_CODE "${INSTALL_CODE} )")
-    message("INSTALL_CODE = ${INSTALL_CODE}")
-    install(CODE "${INSTALL_CODE}")
+    install(TARGETS ${MOD}PythonD 
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/
+        )
+
 
     # Append to previous modules
     list(APPEND PREVMODS ${MOD}PythonD)

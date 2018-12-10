@@ -35,34 +35,50 @@ foreach(LIB ${LIBLIST})
         NAMES "${LIB}.so" 
         PATHS "${project1_INSTALL_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages/stdpywrap1" 
                "${project1_INSTALL_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/stdpywrap1" )    
-    
-    if("${SSLIB_PYTHON_${LIB}}" STREQUAL "SSLIB_PYTHON_${LIB}-NOTFOUND")
-        message(FATAL " Could not find project1 library ${LIB}")
+        if("${SSLIB_PYTHON_${LIB}}" STREQUAL "SSLIB_PYTHON_${LIB}-NOTFOUND")
+       message(FATAL " Could not find project1 library ${LIB}")
     endif()
     list(APPEND project1_PYTHON_SHARED_LIBRARIES "${SSLIB_PYTHON_${LIB}}/${LIB}.so")    
+
+    ## shared PyhtonD.so
+    find_path(SSLIB_PYTHOND_${LIB} 
+        NAMES "lib${LIB}PythonD.so" 
+        PATHS "${project1_INSTALL_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages/stdpywrap1" 
+               "${project1_INSTALL_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/stdpywrap1"
+               "/usr/local/lib/"  )    
+
+    if("${SSLIB_PYTHOND_${LIB}}" STREQUAL "SSLIB_PYTHOND_${LIB}-NOTFOUND")
+        message(FATAL " Could not find SeisTK library ${LIB}")
+    endif()
+    list(APPEND project1_PYTHOND_SHARED_LIBRARIES "${SSLIB_PYTHOND_${LIB}}/lib${LIB}PythonD.so") 
 
     ## static PyhtonD.a
     find_path(SSLIB_PYTHOND_${LIB} 
         NAMES "lib${LIB}PythonD.a" 
         PATHS "${project1_INSTALL_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages/stdpywrap1" 
-               "${project1_INSTALL_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/stdpywrap1"  )    
+               "${project1_INSTALL_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/stdpywrap1"
+               "/usr/local/lib/"  )    
 
     if("${SSLIB_PYTHOND_${LIB}}" STREQUAL "SSLIB_PYTHOND_${LIB}-NOTFOUND")
         message(FATAL " Could not find SeisTK library ${LIB}")
     endif()
     list(APPEND project1_PYTHOND_STATIC_LIBRARIES "${SSLIB_PYTHOND_${LIB}}/lib${LIB}PythonD.a") 
-
     
 endforeach()
 
 message(STATUS "project1_LIBRARIES = ${project1_LIBRARIES}")
 message(STATUS "project1_PYTHON_SHARED_LIBRARIES = ${project1_PYTHON_SHARED_LIBRARIES}")
+message(STATUS "project1_PYTHOND_SHARED_LIBRARIES = ${project1_PYTHOND_SHARED_LIBRARIES}")
 message(STATUS "project1_PYTHOND_STATIC_LIBRARIES = ${project1_PYTHOND_STATIC_LIBRARIES}")
 
+#find_package_handle_standard_args(project1 DEFAULT_MSG 
+#                                project1_INCLUDE_DIR 
+#                                project1_LIBRARIES 
+#                                project1_PYTHOND_SHARED_LIBRARIES
+#                                )
 find_package_handle_standard_args(project1 DEFAULT_MSG 
                                 project1_INCLUDE_DIR 
                                 project1_LIBRARIES 
-                                project1_PYTHON_SHARED_LIBRARIES
-                                project1_PYTHOND_STATIC_LIBRARIES)
+                                )
 mark_as_advanced(project1_INCLUDE_DIR project1_LIBRARIES )
 
